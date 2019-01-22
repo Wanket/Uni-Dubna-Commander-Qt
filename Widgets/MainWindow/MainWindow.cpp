@@ -21,6 +21,7 @@ void MainWindow::setupRootFolder() noexcept
 {
     ui.treeWidget->header()->resizeSection(Constants::Name, 500);
     ui.treeWidget->header()->resizeSection(Constants::Date, 200);
+    ui.treeWidget->sortByColumn(3, Qt::SortOrder::AscendingOrder);
 
     while (true)
     {
