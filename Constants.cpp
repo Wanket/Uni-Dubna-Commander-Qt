@@ -57,3 +57,5 @@ const QString Constants::CANCEL_LITERAL = QStringLiteral("Отмена");
 const QString Constants::FAILED_TO_GET_FILE_LIST_LITERAL = QStringLiteral("Не удалось получить список файлов.");
 
 const QString Constants::FAILED_DOWNLOAD_FILE = QStringLiteral("Не удалось скачать файл.");
+
+const QString Constants::COLON = QStringLiteral(":");

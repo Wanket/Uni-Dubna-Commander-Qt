@@ -27,8 +27,9 @@ private:
 
     QMenu contextMenu;
 
-private:
     inline void setupRootFolder() noexcept;
+
+    inline void setupContextMenu() noexcept;
 
     void setupTreeWidgetChildren(QTreeWidgetItem *item) noexcept;
 
@@ -37,8 +38,6 @@ private:
     void onOpenClick() noexcept;
 
     void fillItem(QTreeWidgetItem *ParentItem, const std::list<FolderItem> &items) const noexcept;
-
-    inline void setupContextMenu() noexcept;
 
     void onCustomContextMenu(const QPoint &point) noexcept;
 

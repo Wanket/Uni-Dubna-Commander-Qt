@@ -2,7 +2,7 @@
 
 #include <QString>
 
-struct Constants
+struct Constants final
 {
     static const QString ROOT_PATH;
 
@@ -61,6 +61,8 @@ struct Constants
     static const QString FAILED_TO_GET_FILE_LIST_LITERAL;
 
     static const QString FAILED_DOWNLOAD_FILE;
+
+    static const QString COLON;
 
     static constexpr const char *DIV = "div";
 

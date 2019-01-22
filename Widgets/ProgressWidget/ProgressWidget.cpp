@@ -8,26 +8,30 @@
 ProgressWidget::ProgressWidget(const DownloadInfo downloadInfo) noexcept : downloadInfo(downloadInfo)
 {
     ui.setupUi(this);
+    ui.progressBar->hide();
 }
 
 void ProgressWidget::onWaitInfo(const QNetworkReply *const pReply) noexcept
 {
-    QObject::connect(ui.cancelButton, &QPushButton::clicked, pReply, &QNetworkReply::finished);
+    QObject::connect(ui.cancelButton, &QPushButton::clicked, pReply, &QNetworkReply::abort);
 }
 
-bool ProgressWidget::startDownload(std::unique_ptr<QNetworkReply> pReply) noexcept
+ProgressWidget::DownloadResult ProgressWidget::startDownload(std::unique_ptr<QNetworkReply> pReply) noexcept
 {
     ui.label->setText(Constants::DOWNLOAD_LITERAL);
+    ui.progressBar->show();
 
     QObject::connect(pReply.get(), &QNetworkReply::downloadProgress, this, &ProgressWidget::onDownloadProgress);
     QObject::connect(ui.cancelButton, &QPushButton::clicked, pReply.get(), &QNetworkReply::abort);
 
     NetworkManager::waitNetworkReply(pReply.get());
 
-    if (pReply->error() != QNetworkReply::NoError)
+    if (const auto error = pReply->error(); error != QNetworkReply::NoError)
     {
         close();
-        return false;
+
+        return error == QNetworkReply::OperationCanceledError ? DownloadResult::Canceled : DownloadResult::Error;
+
     }
 
     ui.label->setText(Constants::EXTRACT_LITERAL);
@@ -37,24 +41,18 @@ bool ProgressWidget::startDownload(std::unique_ptr<QNetworkReply> pReply) noexce
     if (!file.open(QFile::WriteOnly))
     {
         close();
-        return false;
+        return DownloadResult::Error;
     }
 
     file.write(GZip::gzUncompress(pReply->readAll()));
 
     close();
 
-    return true;
+    return DownloadResult::Success;
 }
 
 void ProgressWidget::onDownloadProgress(const qint64 bytesReceived, const qint64 bytesTotal) const noexcept
 {
-    if (bytesReceived != bytesTotal)
-    {
-        ui.progressBar->setValue(static_cast<int>(bytesReceived * 100 / downloadInfo.size));
-    }
-    else
-    {
-        ui.progressBar->setValue(100);
-    }
+    ui.progressBar->setValue(
+            bytesReceived != bytesTotal ? static_cast<int>(bytesReceived * 100 / downloadInfo.size) : 100);
 }

@@ -2,7 +2,7 @@
 
 #include <QTreeWidgetItem>
 
-class TreeWidgetItem : public QTreeWidgetItem
+class TreeWidgetItem final : public QTreeWidgetItem
 {
 public:
     explicit TreeWidgetItem(QTreeWidgetItem *pItem) noexcept;

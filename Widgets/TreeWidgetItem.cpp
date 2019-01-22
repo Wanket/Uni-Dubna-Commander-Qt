@@ -19,11 +19,11 @@ bool TreeWidgetItem::operator<(const QTreeWidgetItem &other) const noexcept
             const auto data = this->text(column);
             const auto otherData = other.text(column);
 
-            const auto date = data.indexOf(":") != -1 ? locale.toDateTime(data, Constants::TIME_FORMAT).addYears(
+            const auto date = data.indexOf(Constants::COLON) != -1 ? locale.toDateTime(data, Constants::TIME_FORMAT).addYears(
                     QDate::currentDate().year()) : locale.toDateTime(data, Constants::YEAR_FORMAT);
 
             const auto otherDate =
-                    otherData.indexOf(":") != -1 ? locale.toDateTime(otherData, Constants::TIME_FORMAT).addYears(
+                    otherData.indexOf(Constants::COLON) != -1 ? locale.toDateTime(otherData, Constants::TIME_FORMAT).addYears(
                             QDate::currentDate().year()) : locale.toDateTime(otherData, Constants::YEAR_FORMAT);
 
             return date < otherDate;

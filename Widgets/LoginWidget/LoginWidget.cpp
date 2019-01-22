@@ -8,6 +8,8 @@
 LoginWidget::LoginWidget() noexcept
 {
     ui.setupUi(this);
+    ui.errorLabel->hide();
+
     setupListeners();
 }
 
@@ -21,27 +23,30 @@ void LoginWidget::onLoginClick() noexcept
 {
     ui.loginButton->blockSignals(true);
 
-    if (!ui.loginLineEdit->text().isEmpty() && !ui.passwordLineEdit->text().isEmpty())
+    if (!(ui.loginLineEdit->text().isEmpty() || ui.passwordLineEdit->text().isEmpty()))
     {
-        auto manager = std::make_unique<NetworkManager>(Login{ ui.loginLineEdit->text(), ui.passwordLineEdit->text() });
+        ui.errorLabel->hide();
 
-        if (manager->isCorrectLogin() == NetworkManager::CorrectLogin::NotCorrect)
+        switch (auto manager = std::make_unique<NetworkManager>(
+                    Login{ ui.loginLineEdit->text(), ui.passwordLineEdit->text() }); manager->isCorrectLogin())
         {
-            ui.errorLabel->setText(Constants::WRONG_LOGIN);
-            return;
+            case NetworkManager::CorrectLogin::Correct:
+            {
+                const auto mainWindow = new MainWindow(std::move(manager));
+                mainWindow->setAttribute(Qt::WA_DeleteOnClose);
+                mainWindow->show();
+
+                close();
+                break;
+            }
+            case NetworkManager::CorrectLogin::NotCorrect:
+                ui.errorLabel->setText(Constants::WRONG_LOGIN);
+                break;
+            case NetworkManager::CorrectLogin::NetworkError:
+                ui.errorLabel->setText(Constants::LOGIN_NETWORK_ERROR);
         }
 
-        if (manager->isCorrectLogin() == NetworkManager::CorrectLogin::NetworkError)
-        {
-            ui.errorLabel->setText(Constants::LOGIN_NETWORK_ERROR);
-            return;
-        }
-
-        const auto mainWindow = new MainWindow(std::move(manager));
-        mainWindow->setAttribute(Qt::WA_DeleteOnClose);
-        mainWindow->show();
-
-        close();
+        ui.errorLabel->show();
     }
 
     ui.loginButton->blockSignals(false);

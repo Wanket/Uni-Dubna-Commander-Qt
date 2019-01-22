@@ -2,7 +2,7 @@
 
 #include <QString>
 
-struct DownloadInfo
+struct DownloadInfo final
 {
     QString from;
     QString to;

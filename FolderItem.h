@@ -2,7 +2,7 @@
 
 #include <QString>
 
-struct FolderItem
+struct FolderItem final
 {
     QString name;
     QString fileSize;

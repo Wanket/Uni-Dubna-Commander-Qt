@@ -52,13 +52,10 @@ NetworkManager::CorrectLogin NetworkManager::isCorrectLogin() noexcept
 {
     const auto reply = GetFtpFiles(Constants::ROOT_PATH);
 
-    if (reply->error() != QNetworkReply::NoError)
-    {
-        return CorrectLogin::NetworkError;
-    }
-
-    return QString(reply->readAll()).indexOf(Constants::PERSONAL_LITERAL) != -1 ? CorrectLogin::Correct
+    return reply->error() != QNetworkReply::NoError ? CorrectLogin::NetworkError :
+           QString(reply->readAll()).indexOf(Constants::PERSONAL_LITERAL) != -1 ? CorrectLogin::Correct
                                                                                 : CorrectLogin::NotCorrect;
+
 }
 
 std::list<FolderItem> NetworkManager::getItems(const QString path)
@@ -103,18 +100,17 @@ std::list<FolderItem> NetworkManager::getItems(const QString path)
     return result;
 }
 
-bool NetworkManager::downloadFile(const DownloadInfo downloadInfo) noexcept
+ProgressWidget::DownloadResult NetworkManager::downloadFile(const DownloadInfo downloadInfo) noexcept
 {
     auto progressWidget = new ProgressWidget(downloadInfo);
     progressWidget->setAttribute(Qt::WA_DeleteOnClose);
 
     auto index = downloadInfo.from.lastIndexOf(Constants::ROOT_PATH);
-    const QString url =
+
+    const auto networkReply = post(
             Constants::BASE_DOWNLOAD_FTP_FILE_URL % downloadInfo.from.left(index) % Constants::NAME_PARAMETER_LITERAL %
             downloadInfo.from.mid(index + 1) % Constants::LOGIN_PARAMETER_LITERAL % login.nickName %
-            Constants::PASSWORD_PARAMETER_LITERAL % login.password;
-
-    const auto networkReply = post(url);
+            Constants::PASSWORD_PARAMETER_LITERAL % login.password);
 
     progressWidget->onWaitInfo(networkReply.get());
     progressWidget->show();
@@ -124,7 +120,9 @@ bool NetworkManager::downloadFile(const DownloadInfo downloadInfo) noexcept
     if (networkReply->error() != QNetworkReply::NoError)
     {
         progressWidget->close();
-        return false;
+
+        return networkReply->error() == QNetworkReply::OperationCanceledError ? ProgressWidget::DownloadResult::Canceled
+                                                                              : ProgressWidget::DownloadResult::Error;
     }
 
     auto json = QJsonDocument::fromJson(networkReply->readAll());
@@ -132,7 +130,7 @@ bool NetworkManager::downloadFile(const DownloadInfo downloadInfo) noexcept
     if (json[Constants::ERROR_MESSAGE_LITERAL] != emptyString)
     {
         progressWidget->close();
-        return false;
+        return ProgressWidget::DownloadResult::Error;
     }
 
     return progressWidget->startDownload(std::unique_ptr<QNetworkReply>(manager.get(

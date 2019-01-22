@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>203</width>
+    <width>186</width>
     <height>146</height>
    </rect>
   </property>
@@ -15,12 +15,19 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="2">
-    <widget class="QLineEdit" name="loginLineEdit"/>
+    <widget class="QLineEdit" name="loginLineEdit">
+     <property name="placeholderText">
+      <string>Логин</string>
+     </property>
+    </widget>
    </item>
    <item row="1" column="0" colspan="2">
     <widget class="QLineEdit" name="passwordLineEdit">
      <property name="echoMode">
       <enum>QLineEdit::Password</enum>
+     </property>
+     <property name="placeholderText">
+      <string>Пароль</string>
      </property>
     </widget>
    </item>

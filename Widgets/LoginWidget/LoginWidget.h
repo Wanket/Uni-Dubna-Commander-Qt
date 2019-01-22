@@ -2,7 +2,7 @@
 
 #include "ui_LoginWidget.h"
 
-class LoginWidget : public QWidget
+class LoginWidget final : public QWidget
 {
 public:
     LoginWidget() noexcept;

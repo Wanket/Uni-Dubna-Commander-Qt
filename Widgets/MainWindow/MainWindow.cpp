@@ -108,6 +108,8 @@ void MainWindow::setupTreeWidgetChildren(QTreeWidgetItem *item) noexcept
                                                                 Constants::RETRY_LITERAL, Constants::CANCEL_LITERAL);
                         messageBox->exec() != QMessageBox::Ok)
                 {
+                    item->setExpanded(false);
+                    child->setText(Constants::Name, Constants::POINT_LITERAL);
                     return;
                 }
             }
@@ -144,7 +146,9 @@ void MainWindow::onDoubleClick(const QTreeWidgetItem *const item, const int colu
 
         const QDir downloadDir(downloadInfo.to.left(downloadInfo.to.lastIndexOf(Constants::ROOT_PATH)));
 
-        while (!(downloadDir.mkpath(downloadDir.path()) && networkManagerPtr->downloadFile(downloadInfo)))
+        const auto downloadResult = networkManagerPtr->downloadFile(downloadInfo);
+
+        while (!downloadDir.mkpath(downloadDir.path()) || downloadResult == ProgressWidget::DownloadResult::Error)
         {
             if (auto *const messageBox = generateMessageBox(Constants::FAILED_DOWNLOAD_FILE,
                                                             Constants::RETRY_LITERAL, Constants::CANCEL_LITERAL);
@@ -154,7 +158,10 @@ void MainWindow::onDoubleClick(const QTreeWidgetItem *const item, const int colu
             }
         }
 
-        QDesktopServices::openUrl(QUrl::fromLocalFile(downloadInfo.to));
+        if (downloadResult == ProgressWidget::DownloadResult::Success)
+        {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(downloadInfo.to));
+        }
     }
 }
 
@@ -190,7 +197,8 @@ void MainWindow::onSaveAsClick() noexcept
 
         const QDir downloadDir(downloadInfo.to.left(downloadInfo.to.lastIndexOf(Constants::ROOT_PATH)));
 
-        while (!(downloadDir.mkpath(downloadDir.path()) && networkManagerPtr->downloadFile(downloadInfo)))
+        while (!downloadDir.mkpath(downloadDir.path()) ||
+               networkManagerPtr->downloadFile(downloadInfo) == ProgressWidget::DownloadResult::Error)
         {
             if (auto *const messageBox = generateMessageBox(Constants::FAILED_DOWNLOAD_FILE,
                                                             Constants::RETRY_LITERAL, Constants::CANCEL_LITERAL);

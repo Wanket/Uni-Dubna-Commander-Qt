@@ -2,7 +2,7 @@
 
 #include <QString>
 
-struct Login
+struct Login final
 {
     QString nickName;
     QString password;
