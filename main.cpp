@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <QtWidgets/QStyleFactory>
 
 #include "Widgets/LoginWidget/LoginWidget.h"
 
