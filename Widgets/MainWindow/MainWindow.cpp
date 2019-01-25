@@ -147,9 +147,11 @@ void MainWindow::onDoubleClick(const QTreeWidgetItem *const item, const int colu
 
         const QDir downloadDir(downloadInfo.to.left(downloadInfo.to.lastIndexOf(Constants::ROOT_PATH)));
 
-        const auto downloadResult = networkManagerPtr->downloadFile(downloadInfo);
+        ProgressWidget::DownloadResult downloadResult;
 
-        while (!downloadDir.mkpath(downloadDir.path()) || downloadResult == ProgressWidget::DownloadResult::Error)
+        while (!downloadDir.mkpath(downloadDir.path()) ||
+               (downloadResult = networkManagerPtr->downloadFile(downloadInfo)) ==
+               ProgressWidget::DownloadResult::Error)
         {
             if (auto *const messageBox = generateMessageBox(Constants::FAILED_DOWNLOAD_FILE,
                                                             Constants::RETRY_LITERAL, Constants::CANCEL_LITERAL);
